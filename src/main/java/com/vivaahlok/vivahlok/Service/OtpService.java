@@ -1,48 +1,68 @@
 package com.vivaahlok.vivahlok.Service;
 
-import org.springframework.beans.factory.annotation.Value;     // ✅ correct import
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import com.twilio.rest.api.v2010.account.Message;            // ✅ correct Twilio import
-import com.twilio.type.PhoneNumber;                          // ✅ correct PhoneNumber
-
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OtpService {
 
-    @Value("${twilio.phone_number}")
-    private String fromNumber;
+    @Value("${phoneemail.api.key}")
+    private String apiKey;
 
-    private final Map<String, String> otpStore = new ConcurrentHashMap<>();
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    public String generateOtp() {
-        int otp = (int) (Math.random() * 900000) + 100000;
-        return String.valueOf(otp);
-    }
-
+    // You can skip generating OTP here because phone.email sends OTP automatically
     public void sendOtp(String phoneNumber) {
-        String otp = generateOtp();
-        otpStore.put(phoneNumber, otp);
 
-        String messageBody = "Your OTP is: " + otp + " (valid for 5 minutes)";
+        String url = "https://www.phone.email/api/send-otp";
 
-        Message.creator(
-                new PhoneNumber(phoneNumber),
-                new PhoneNumber(fromNumber),    // sender (Twilio number)
-                messageBody
-        ).create();
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("apikey", apiKey);
+            body.add("number", phoneNumber);
+
+            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+            System.out.println("📤 SENDING REQUEST TO phone.email ... " + body);
+
+            String response = restTemplate.postForObject(url, entity, String.class);
+
+            System.out.println("📥 PHONE EMAIL SEND RESPONSE = " + response);
+
+        } catch (Exception e) {
+            System.out.println("❌ PHONE EMAIL SEND ERROR = " + e.getMessage());
+            e.printStackTrace();  // 🔥 print full error
+        }
     }
 
-    public boolean verifyOtp(String phoneNumber, String userOtp) {
-        String storedOtp = otpStore.get(phoneNumber);
 
-        if (storedOtp != null && storedOtp.equals(userOtp)) {
-            otpStore.remove(phoneNumber);
-            return true;
-        }
+    public boolean verifyOtp(String phoneNumber, String otp) {
 
-        return false;
+        String url = "https://phone.email/api/verify-otp";
+
+        Map<String, String> body = new HashMap<>();
+        body.put("apikey", apiKey);
+        body.put("number", phoneNumber);
+        body.put("otp", otp);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+
+        String response = restTemplate.postForObject(url, entity, String.class);
+
+        // Phone.Email returns: {"status":true} or {"status":false}
+        return response != null && response.contains("\"status\":true");
     }
 }
