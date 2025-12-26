@@ -2,6 +2,8 @@ package com.vivaahlok.vivahlok.service;
 
 import com.vivaahlok.vivahlok.dto.*;
 import com.vivaahlok.vivahlok.dto.request.AddReviewRequest;
+import com.vivaahlok.vivahlok.dto.request.CreateVendorRequest;
+import com.vivaahlok.vivahlok.dto.request.UpdateVendorRequest;
 import com.vivaahlok.vivahlok.dto.response.PageResponse;
 import com.vivaahlok.vivahlok.dto.response.ReviewsResponse;
 import com.vivaahlok.vivahlok.entity.Review;
@@ -153,6 +155,71 @@ public class VendorService {
         updateVendorRating(vendorId);
         
         return review.getId();
+    }
+    
+    public String createVendor(CreateVendorRequest request) {
+        Vendor vendor = Vendor.builder()
+                .name(request.getName())
+                .category(request.getCategory())
+                .description(request.getDescription())
+                .services(request.getServices())
+                .price(request.getPrice())
+                .phone(request.getPhone())
+                .email(request.getEmail())
+                .image(request.getImage())
+                .gallery(request.getGallery())
+                .address(request.getAddress())
+                .city(request.getCity())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .isFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false)
+                .rating(0.0)
+                .reviewCount(0)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        
+        vendor = vendorRepository.save(vendor);
+        return vendor.getId();
+    }
+    
+    public VendorDTO updateVendor(String id, UpdateVendorRequest request) {
+        Vendor vendor = vendorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found"));
+        
+        if (request.getName() != null) vendor.setName(request.getName());
+        if (request.getCategory() != null) vendor.setCategory(request.getCategory());
+        if (request.getDescription() != null) vendor.setDescription(request.getDescription());
+        if (request.getServices() != null) vendor.setServices(request.getServices());
+        if (request.getPrice() != null) vendor.setPrice(request.getPrice());
+        if (request.getPhone() != null) vendor.setPhone(request.getPhone());
+        if (request.getEmail() != null) vendor.setEmail(request.getEmail());
+        if (request.getImage() != null) vendor.setImage(request.getImage());
+        if (request.getGallery() != null) vendor.setGallery(request.getGallery());
+        if (request.getAddress() != null) vendor.setAddress(request.getAddress());
+        if (request.getCity() != null) vendor.setCity(request.getCity());
+        if (request.getLatitude() != null) vendor.setLatitude(request.getLatitude());
+        if (request.getLongitude() != null) vendor.setLongitude(request.getLongitude());
+        if (request.getIsActive() != null) vendor.setActive(request.getIsActive());
+        if (request.getIsFeatured() != null) vendor.setFeatured(request.getIsFeatured());
+        
+        vendor.setUpdatedAt(LocalDateTime.now());
+        vendor = vendorRepository.save(vendor);
+        
+        return mapToVendorDTO(vendor);
+    }
+    
+    public void deleteVendor(String id) {
+        Vendor vendor = vendorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found"));
+        vendorRepository.delete(vendor);
+    }
+    
+    public List<VendorDTO> getAllVendorsAdmin() {
+        return vendorRepository.findAll().stream()
+                .map(this::mapToVendorDTO)
+                .collect(Collectors.toList());
     }
     
     private void updateVendorRating(String vendorId) {

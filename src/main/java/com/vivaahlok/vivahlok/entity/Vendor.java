@@ -33,12 +33,12 @@ public class Vendor {
     private String city;
     private Double latitude;
     private Double longitude;
-    
     @Builder.Default
     private boolean isActive = true;
     
     @Builder.Default
     private boolean isFeatured = false;
+
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

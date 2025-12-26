@@ -13,8 +13,6 @@ import com.vivaahlok.vivahlok.repository.InvitationCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +26,7 @@ public class CardService {
     private final InvitationCardRepository invitationCardRepository;
     
     public List<CardDesignDTO> getCardDesigns() {
-        return cardDesignRepository.findByIsActiveTrue()
-                .stream()
+        return cardDesignRepository.findByIsActiveTrue().stream()
                 .map(this::mapToCardDesignDTO)
                 .collect(Collectors.toList());
     }
@@ -38,12 +35,9 @@ public class CardService {
         CardDesign design = cardDesignRepository.findById(request.getDesignId())
                 .orElseThrow(() -> new ResourceNotFoundException("Card design not found"));
         
-        String cardId = UUID.randomUUID().toString();
-        String cardUrl = "/cards/view/" + cardId;
-        String shareUrl = "/cards/share/" + cardId;
+        String shareToken = UUID.randomUUID().toString();
         
         InvitationCard card = InvitationCard.builder()
-                .id(cardId)
                 .userId(userId)
                 .designId(request.getDesignId())
                 .designName(design.getName())
@@ -51,9 +45,9 @@ public class CardService {
                 .brideName(request.getBrideName())
                 .eventDate(request.getEventDate())
                 .venue(request.getVenue())
-                .isFamily(request.isFamily())
-                .cardUrl(cardUrl)
-                .shareUrl(shareUrl)
+                .isFamily(request.getIsFamily() != null ? request.getIsFamily() : false)
+                .cardUrl("/cards/view/" + shareToken)
+                .shareUrl("/cards/share/" + shareToken)
                 .thumbnail(design.getPreviewImage())
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -63,46 +57,45 @@ public class CardService {
     }
     
     public List<InvitationCardDTO> getUserCards(String userId) {
-        return invitationCardRepository.findByUserId(userId)
-                .stream()
+        return invitationCardRepository.findByUserId(userId).stream()
                 .map(this::mapToInvitationCardDTO)
                 .collect(Collectors.toList());
     }
     
-    public InvitationCardDTO getCardById(String cardId, String userId) {
-        InvitationCard card = invitationCardRepository.findById(cardId)
+    public InvitationCardDTO getCardById(String id, String userId) {
+        InvitationCard card = invitationCardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
         
         if (!card.getUserId().equals(userId)) {
-            throw new BadRequestException("Unauthorized access to card");
+            throw new BadRequestException("Access denied");
         }
         
         return mapToInvitationCardDTO(card);
     }
     
-    public void deleteCard(String cardId, String userId) {
-        InvitationCard card = invitationCardRepository.findById(cardId)
+    public void deleteCard(String id, String userId) {
+        InvitationCard card = invitationCardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
         
         if (!card.getUserId().equals(userId)) {
-            throw new BadRequestException("Unauthorized access to card");
+            throw new BadRequestException("Access denied");
         }
         
         invitationCardRepository.delete(card);
     }
     
-    public ShareResponse getShareLink(String cardId, String userId) {
-        InvitationCard card = invitationCardRepository.findById(cardId)
+    public ShareResponse getShareLink(String id, String userId) {
+        InvitationCard card = invitationCardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
         
         if (!card.getUserId().equals(userId)) {
-            throw new BadRequestException("Unauthorized access to card");
+            throw new BadRequestException("Access denied");
         }
         
-        String shareUrl = card.getShareUrl();
-        String whatsappMessage = String.format("You're invited to %s & %s's wedding on %s at %s",
-                card.getGroomName(), card.getBrideName(), card.getEventDate(), card.getVenue());
-        String whatsappUrl = "https://wa.me/?text=" + URLEncoder.encode(whatsappMessage + " " + shareUrl, StandardCharsets.UTF_8);
+        String baseUrl = "https://vivaahlok.com";
+        String shareUrl = baseUrl + card.getShareUrl();
+        String whatsappUrl = "https://wa.me/?text=" + java.net.URLEncoder.encode(
+                "You're invited! " + shareUrl, java.nio.charset.StandardCharsets.UTF_8);
         
         return ShareResponse.builder()
                 .shareUrl(shareUrl)
@@ -116,6 +109,7 @@ public class CardService {
                 .name(design.getName())
                 .previewImage(design.getPreviewImage())
                 .category(design.getCategory())
+                .templateUrl(design.getTemplateUrl())
                 .build();
     }
     

@@ -3,6 +3,8 @@ package com.vivaahlok.vivahlok.controller;
 import com.vivaahlok.vivahlok.dto.VendorDTO;
 import com.vivaahlok.vivahlok.dto.VendorListDTO;
 import com.vivaahlok.vivahlok.dto.request.AddReviewRequest;
+import com.vivaahlok.vivahlok.dto.request.CreateVendorRequest;
+import com.vivaahlok.vivahlok.dto.request.UpdateVendorRequest;
 import com.vivaahlok.vivahlok.dto.response.ApiResponse;
 import com.vivaahlok.vivahlok.dto.response.PageResponse;
 import com.vivaahlok.vivahlok.dto.response.ReviewsResponse;
@@ -86,5 +88,36 @@ public class VendorController {
             @Valid @RequestBody AddReviewRequest request) {
         String reviewId = vendorService.addReview(id, userId, request);
         return ResponseEntity.ok(ApiResponse.success("Review added successfully", Map.of("reviewId", reviewId)));
+    }
+    
+    @PostMapping
+    @Operation(summary = "Create new vendor")
+    public ResponseEntity<ApiResponse<Map<String, String>>> createVendor(
+            @Valid @RequestBody CreateVendorRequest request) {
+        String vendorId = vendorService.createVendor(request);
+        return ResponseEntity.ok(ApiResponse.success("Vendor created successfully", Map.of("vendorId", vendorId)));
+    }
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "Update vendor")
+    public ResponseEntity<ApiResponse<VendorDTO>> updateVendor(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateVendorRequest request) {
+        VendorDTO vendor = vendorService.updateVendor(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Vendor updated successfully", vendor));
+    }
+    
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete vendor")
+    public ResponseEntity<ApiResponse<Void>> deleteVendor(@PathVariable String id) {
+        vendorService.deleteVendor(id);
+        return ResponseEntity.ok(ApiResponse.success("Vendor deleted successfully"));
+    }
+    
+    @GetMapping("/admin/all")
+    @Operation(summary = "Get all vendors (admin)")
+    public ResponseEntity<List<VendorDTO>> getAllVendorsAdmin() {
+        List<VendorDTO> vendors = vendorService.getAllVendorsAdmin();
+        return ResponseEntity.ok(vendors);
     }
 }

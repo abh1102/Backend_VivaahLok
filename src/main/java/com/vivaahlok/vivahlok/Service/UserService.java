@@ -28,21 +28,11 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
-        if (request.getName() != null) {
-            user.setName(request.getName());
-        }
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
-        }
-        if (request.getAddress() != null) {
-            user.setAddress(request.getAddress());
-        }
-        if (request.getCity() != null) {
-            user.setCity(request.getCity());
-        }
-        if (request.getOccupation() != null) {
-            user.setOccupation(request.getOccupation());
-        }
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getAddress() != null) user.setAddress(request.getAddress());
+        if (request.getCity() != null) user.setCity(request.getCity());
+        if (request.getOccupation() != null) user.setOccupation(request.getOccupation());
         
         user.setUpdatedAt(LocalDateTime.now());
         user = userRepository.save(user);
@@ -54,8 +44,11 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
-        String imageUrl = fileStorageService.uploadFile(file, "profiles/" + userId);
+        if (user.getProfileImage() != null) {
+            fileStorageService.deleteFile(user.getProfileImage());
+        }
         
+        String imageUrl = fileStorageService.storeFile(file, "profiles");
         user.setProfileImage(imageUrl);
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -73,11 +66,6 @@ public class UserService {
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
         }
-    }
-    
-    public User getUserById(String userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
     
     private UserDTO mapToUserDTO(User user) {

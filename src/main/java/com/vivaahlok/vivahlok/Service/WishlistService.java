@@ -9,7 +9,6 @@ import com.vivaahlok.vivahlok.repository.VendorRepository;
 import com.vivaahlok.vivahlok.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +25,21 @@ public class WishlistService {
         List<Wishlist> wishlists = wishlistRepository.findByUserId(userId);
         
         return wishlists.stream()
-                .map(this::mapToWishlistDTO)
+                .map(wishlist -> {
+                    Vendor vendor = vendorRepository.findById(wishlist.getVendorId()).orElse(null);
+                    if (vendor == null) return null;
+                    
+                    return WishlistDTO.builder()
+                            .id(wishlist.getId())
+                            .vendorId(vendor.getId())
+                            .vendorName(vendor.getName())
+                            .vendorImage(vendor.getImage())
+                            .vendorCategory(vendor.getCategory())
+                            .vendorRating(vendor.getRating())
+                            .addedAt(wishlist.getCreatedAt())
+                            .build();
+                })
+                .filter(w -> w != null)
                 .collect(Collectors.toList());
     }
     
@@ -48,21 +61,7 @@ public class WishlistService {
         return wishlist.getId();
     }
     
-    @Transactional
     public void removeFromWishlist(String userId, String vendorId) {
         wishlistRepository.deleteByUserIdAndVendorId(userId, vendorId);
-    }
-    
-    private WishlistDTO mapToWishlistDTO(Wishlist wishlist) {
-        Vendor vendor = vendorRepository.findById(wishlist.getVendorId()).orElse(null);
-        
-        return WishlistDTO.builder()
-                .id(wishlist.getId())
-                .vendorId(wishlist.getVendorId())
-                .vendorName(vendor != null ? vendor.getName() : null)
-                .image(vendor != null ? vendor.getImage() : null)
-                .category(vendor != null ? vendor.getCategory() : null)
-                .price(vendor != null ? vendor.getPrice() : null)
-                .build();
     }
 }

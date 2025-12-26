@@ -18,21 +18,21 @@ public class SettingsService {
     
     public SettingsDTO getSettings(String userId) {
         UserSettings settings = userSettingsRepository.findByUserId(userId)
-                .orElseGet(() -> createDefaultSettings(userId));
+                .orElse(UserSettings.builder()
+                        .userId(userId)
+                        .notifications(true)
+                        .language("en")
+                        .build());
         
         return mapToSettingsDTO(settings);
     }
     
     public void updateSettings(String userId, UpdateSettingsRequest request) {
         UserSettings settings = userSettingsRepository.findByUserId(userId)
-                .orElseGet(() -> createDefaultSettings(userId));
+                .orElse(UserSettings.builder().userId(userId).build());
         
-        if (request.getNotifications() != null) {
-            settings.setNotifications(request.getNotifications());
-        }
-        if (request.getLanguage() != null) {
-            settings.setLanguage(request.getLanguage());
-        }
+        if (request.getNotifications() != null) settings.setNotifications(request.getNotifications());
+        if (request.getLanguage() != null) settings.setLanguage(request.getLanguage());
         
         settings.setUpdatedAt(LocalDateTime.now());
         userSettingsRepository.save(settings);
@@ -40,36 +40,23 @@ public class SettingsService {
     
     public void updateLocation(String userId, UpdateLocationRequest request) {
         UserSettings settings = userSettingsRepository.findByUserId(userId)
-                .orElseGet(() -> createDefaultSettings(userId));
+                .orElse(UserSettings.builder().userId(userId).build());
         
-        if (request.getCity() != null) {
-            settings.setCity(request.getCity());
-        }
-        if (request.getLat() != null) {
-            settings.setLatitude(request.getLat());
-        }
-        if (request.getLng() != null) {
-            settings.setLongitude(request.getLng());
-        }
+        if (request.getCity() != null) settings.setCity(request.getCity());
+        if (request.getLatitude() != null) settings.setLatitude(request.getLatitude());
+        if (request.getLongitude() != null) settings.setLongitude(request.getLongitude());
         
         settings.setUpdatedAt(LocalDateTime.now());
         userSettingsRepository.save(settings);
-    }
-    
-    private UserSettings createDefaultSettings(String userId) {
-        UserSettings settings = UserSettings.builder()
-                .userId(userId)
-                .notifications(true)
-                .language("en")
-                .build();
-        return userSettingsRepository.save(settings);
     }
     
     private SettingsDTO mapToSettingsDTO(UserSettings settings) {
         return SettingsDTO.builder()
                 .notifications(settings.isNotifications())
                 .language(settings.getLanguage())
-                .location(settings.getCity())
+                .city(settings.getCity())
+                .latitude(settings.getLatitude())
+                .longitude(settings.getLongitude())
                 .build();
     }
 }

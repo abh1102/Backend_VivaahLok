@@ -25,61 +25,60 @@ public class HomeService {
     private final VendorRepository vendorRepository;
     
     public List<BannerDTO> getBanners() {
-        return bannerRepository.findByIsActiveTrueOrderBySortOrderAsc()
-                .stream()
+        return bannerRepository.findByIsActiveTrueOrderBySortOrderAsc().stream()
                 .map(this::mapToBannerDTO)
                 .collect(Collectors.toList());
     }
     
     public List<CategoryDTO> getCategories() {
-        return categoryRepository.findByIsActiveTrueOrderBySortOrderAsc()
-                .stream()
+        return categoryRepository.findByIsActiveTrueOrderBySortOrderAsc().stream()
                 .map(this::mapToCategoryDTO)
                 .collect(Collectors.toList());
     }
     
     public List<OccasionDTO> getOccasions() {
-        return occasionRepository.findByIsActiveTrueOrderBySortOrderAsc()
-                .stream()
+        return occasionRepository.findByIsActiveTrueOrderBySortOrderAsc().stream()
                 .map(this::mapToOccasionDTO)
                 .collect(Collectors.toList());
     }
     
     public List<NearbyServiceDTO> getNearbyServices(Double lat, Double lng, Integer radius) {
-        List<Vendor> vendors = vendorRepository.findByIsActiveTrue(null).getContent();
+        List<Vendor> vendors = vendorRepository.findByIsActiveTrue();
         
         return vendors.stream()
                 .filter(v -> v.getLatitude() != null && v.getLongitude() != null)
                 .filter(v -> calculateDistance(lat, lng, v.getLatitude(), v.getLongitude()) <= radius)
                 .map(v -> NearbyServiceDTO.builder()
                         .id(v.getId())
-                        .title(v.getName())
-                        .image(v.getImage())
-                        .distance(String.format("%.1f km", calculateDistance(lat, lng, v.getLatitude(), v.getLongitude())))
-                        .build())
-                .collect(Collectors.toList());
-    }
-    
-    public List<FeaturedVendorDTO> getFeaturedVendors() {
-        return vendorRepository.findByIsFeaturedTrueAndIsActiveTrue()
-                .stream()
-                .map(v -> FeaturedVendorDTO.builder()
-                        .id(v.getId())
                         .name(v.getName())
-                        .image(v.getImage())
                         .category(v.getCategory())
+                        .image(v.getImage())
+                        .distance(calculateDistance(lat, lng, v.getLatitude(), v.getLongitude()))
                         .rating(v.getRating())
                         .build())
                 .collect(Collectors.toList());
     }
     
-    private double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+    public List<FeaturedVendorDTO> getFeaturedVendors() {
+        return vendorRepository.findByIsFeaturedTrueAndIsActiveTrue().stream()
+                .map(v -> FeaturedVendorDTO.builder()
+                        .id(v.getId())
+                        .name(v.getName())
+                        .category(v.getCategory())
+                        .image(v.getImage())
+                        .rating(v.getRating())
+                        .price(v.getPrice())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371;
         double latDistance = Math.toRadians(lat2 - lat1);
-        double lngDistance = Math.toRadians(lng2 - lng1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }

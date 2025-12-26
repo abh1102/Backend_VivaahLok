@@ -12,9 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,13 +31,12 @@ public class NotificationService {
         
         user.setFcmToken(request.getFcmToken());
         user.setPlatform(request.getPlatform());
-        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
     
     public NotificationsResponse getNotifications(String userId, int page, int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
-        Page<Notification> notificationPage = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Notification> notificationPage = notificationRepository.findByUserId(userId, pageable);
         
         long unreadCount = notificationRepository.countByUserIdAndIsReadFalse(userId);
         
@@ -47,23 +46,25 @@ public class NotificationService {
         
         return NotificationsResponse.builder()
                 .notifications(notifications)
-                .unreadCount(unreadCount)
+                .unreadCount((int) unreadCount)
+                .total(notificationPage.getTotalElements())
+                .page(page)
+                .pages(notificationPage.getTotalPages())
                 .build();
     }
     
-    public void markAsRead(String notificationId, String userId) {
-        Notification notification = notificationRepository.findById(notificationId)
+    public void markAsRead(String id, String userId) {
+        Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
         
-        notification.setRead(true);
-        notificationRepository.save(notification);
+        if (notification.getUserId().equals(userId)) {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        }
     }
     
     public void markAllAsRead(String userId) {
-        List<Notification> unreadNotifications = notificationRepository.findByUserIdAndIsReadFalse(userId);
-        
-        unreadNotifications.forEach(n -> n.setRead(true));
-        notificationRepository.saveAll(unreadNotifications);
+        notificationRepository.markAllAsReadByUserId(userId);
     }
     
     private NotificationDTO mapToNotificationDTO(Notification notification) {

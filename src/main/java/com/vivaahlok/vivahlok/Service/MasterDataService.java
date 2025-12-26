@@ -24,22 +24,19 @@ public class MasterDataService {
     private final OccasionRepository occasionRepository;
     
     public List<CityDTO> getCities() {
-        return cityRepository.findByIsActiveTrue()
-                .stream()
+        return cityRepository.findByIsActiveTrue().stream()
                 .map(this::mapToCityDTO)
                 .collect(Collectors.toList());
     }
     
     public List<ServiceTypeDTO> getServiceTypes() {
-        return serviceTypeRepository.findByIsActiveTrue()
-                .stream()
+        return serviceTypeRepository.findByIsActiveTrue().stream()
                 .map(this::mapToServiceTypeDTO)
                 .collect(Collectors.toList());
     }
     
     public List<OccasionDTO> getOccasionTypes() {
-        return occasionRepository.findByIsActiveTrueOrderBySortOrderAsc()
-                .stream()
+        return occasionRepository.findByIsActiveTrueOrderBySortOrderAsc().stream()
                 .map(this::mapToOccasionDTO)
                 .collect(Collectors.toList());
     }

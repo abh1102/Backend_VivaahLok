@@ -1,9 +1,9 @@
 package com.vivaahlok.vivahlok.service;
 
 import com.vivaahlok.vivahlok.exception.BadRequestException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -13,52 +13,41 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
-@Slf4j
 @Service
 public class FileStorageService {
     
     @Value("${file.upload-dir}")
     private String uploadDir;
     
-    public String uploadFile(MultipartFile file, String subDirectory) {
+    public String storeFile(MultipartFile file, String subDirectory) {
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String newFilename = UUID.randomUUID().toString() + fileExtension;
+        
         try {
-            if (file.isEmpty()) {
-                throw new BadRequestException("File is empty");
-            }
+            Path targetLocation = Paths.get(uploadDir, subDirectory).toAbsolutePath().normalize();
+            Files.createDirectories(targetLocation);
             
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            
-            String newFilename = UUID.randomUUID().toString() + extension;
-            
-            Path uploadPath = Paths.get(uploadDir, subDirectory);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-            
-            Path filePath = uploadPath.resolve(newFilename);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            Path targetPath = targetLocation.resolve(newFilename);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
             
             return "/uploads/" + subDirectory + "/" + newFilename;
-            
-        } catch (IOException e) {
-            log.error("Error uploading file: {}", e.getMessage());
-            throw new BadRequestException("Failed to upload file");
+        } catch (IOException ex) {
+            throw new BadRequestException("Could not store file: " + ex.getMessage());
         }
     }
     
     public void deleteFile(String fileUrl) {
+        if (fileUrl == null || !fileUrl.startsWith("/uploads/")) {
+            return;
+        }
+        
         try {
-            if (fileUrl != null && fileUrl.startsWith("/uploads/")) {
-                String relativePath = fileUrl.substring("/uploads/".length());
-                Path filePath = Paths.get(uploadDir, relativePath);
-                Files.deleteIfExists(filePath);
-            }
-        } catch (IOException e) {
-            log.error("Error deleting file: {}", e.getMessage());
+            String relativePath = fileUrl.substring("/uploads/".length());
+            Path filePath = Paths.get(uploadDir).resolve(relativePath).toAbsolutePath().normalize();
+            Files.deleteIfExists(filePath);
+        } catch (IOException ex) {
+            // Log error but don't throw
         }
     }
 }

@@ -19,8 +19,7 @@ public class FacilityService {
     private final VendorRepository vendorRepository;
     
     public List<FacilityDTO> getAllFacilities() {
-        return facilityRepository.findByIsActiveTrue()
-                .stream()
+        return facilityRepository.findByIsActiveTrue().stream()
                 .map(this::mapToFacilityDTO)
                 .collect(Collectors.toList());
     }
@@ -28,21 +27,19 @@ public class FacilityService {
     public FacilityDTO getFacilityById(String id) {
         Facility facility = facilityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Facility not found"));
-        
-        FacilityDTO dto = mapToFacilityDTO(facility);
-        long vendorCount = vendorRepository.countByCategoryAndIsActiveTrue(facility.getName());
-        dto.setVendorCount((int) vendorCount);
-        
-        return dto;
+        return mapToFacilityDTO(facility);
     }
     
     private FacilityDTO mapToFacilityDTO(Facility facility) {
+        long vendorCount = vendorRepository.countByCategory(facility.getName());
+        
         return FacilityDTO.builder()
                 .id(facility.getId())
                 .name(facility.getName())
                 .icon(facility.getIcon())
                 .image(facility.getImage())
                 .description(facility.getDescription())
+                .vendorCount((int) vendorCount)
                 .build();
     }
 }
