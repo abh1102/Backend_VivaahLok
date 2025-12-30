@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 @Data
 public class UpdateBookingRequest {
-    private LocalDate date;
-    private String time;
+    private LocalDate eventDate;
+    private String eventTime;
     private String notes;
 }

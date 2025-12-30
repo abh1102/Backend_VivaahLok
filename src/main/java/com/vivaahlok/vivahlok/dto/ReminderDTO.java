@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,4 +22,5 @@ public class ReminderDTO {
     private boolean pushEnabled;
     private boolean whatsAppEnabled;
     private List<String> contacts;
+    private LocalDateTime createdAt;
 }

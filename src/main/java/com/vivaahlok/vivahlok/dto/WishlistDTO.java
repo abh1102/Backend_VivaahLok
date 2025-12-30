@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,6 +16,10 @@ public class WishlistDTO {
     private String vendorId;
     private String vendorName;
     private String image;
+    private String vendorImage;
+    private String vendorCategory;
+    private Double vendorRating;
     private String category;
     private Double price;
+    private LocalDateTime addedAt;
 }

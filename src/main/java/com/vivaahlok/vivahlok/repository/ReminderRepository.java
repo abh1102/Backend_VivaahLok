@@ -11,6 +11,8 @@ import java.util.List;
 public interface ReminderRepository extends MongoRepository<Reminder, String> {
     List<Reminder> findByUserId(String userId);
     
+    List<Reminder> findByUserIdOrderByDateAsc(String userId);
+    
     List<Reminder> findByUserIdAndDate(String userId, LocalDate date);
     
     List<Reminder> findByDateAndPushEnabledTrue(LocalDate date);

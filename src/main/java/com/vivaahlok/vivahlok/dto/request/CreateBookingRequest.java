@@ -13,12 +13,14 @@ public class CreateBookingRequest {
     private String vendorId;
     
     @NotNull(message = "Event date is required")
-    private LocalDate date;
+    private LocalDate eventDate;
     
     @NotBlank(message = "Event time is required")
-    private String time;
+    private String eventTime;
     
     private List<String> services;
     
     private String notes;
+    
+    private Double amount;
 }

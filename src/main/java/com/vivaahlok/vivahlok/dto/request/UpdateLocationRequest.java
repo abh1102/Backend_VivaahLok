@@ -7,4 +7,5 @@ public class UpdateLocationRequest {
     private String city;
     private Double lat;
     private Double lng;
+
 }

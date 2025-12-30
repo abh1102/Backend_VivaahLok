@@ -43,18 +43,18 @@ public class HomeService {
     }
     
     public List<NearbyServiceDTO> getNearbyServices(Double lat, Double lng, Integer radius) {
-        List<Vendor> vendors = vendorRepository.findByIsActiveTrue();
+        List<Vendor> vendors = (List<Vendor>) vendorRepository.findByIsActiveTrue();
         
         return vendors.stream()
                 .filter(v -> v.getLatitude() != null && v.getLongitude() != null)
                 .filter(v -> calculateDistance(lat, lng, v.getLatitude(), v.getLongitude()) <= radius)
                 .map(v -> NearbyServiceDTO.builder()
                         .id(v.getId())
-                        .name(v.getName())
-                        .category(v.getCategory())
+//                        .name(v.getName())
+//                        .category(v.getCategory())
                         .image(v.getImage())
-                        .distance(calculateDistance(lat, lng, v.getLatitude(), v.getLongitude()))
-                        .rating(v.getRating())
+//                        .distance(calculateDistance(lat, lng, v.getLatitude(), v.getLongitude()))
+//                        .rating(v.getRating())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -67,7 +67,7 @@ public class HomeService {
                         .category(v.getCategory())
                         .image(v.getImage())
                         .rating(v.getRating())
-                        .price(v.getPrice())
+//                        .price(v.getPrice())
                         .build())
                 .collect(Collectors.toList());
     }

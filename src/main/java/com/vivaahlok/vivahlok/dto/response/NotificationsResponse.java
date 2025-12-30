@@ -15,4 +15,7 @@ import java.util.List;
 public class NotificationsResponse {
     private List<NotificationDTO> notifications;
     private long unreadCount;
+    private long total;
+    private int page;
+    private int pages;
 }

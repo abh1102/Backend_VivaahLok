@@ -13,6 +13,8 @@ import java.util.List;
 public interface VendorRepository extends MongoRepository<Vendor, String> {
     Page<Vendor> findByIsActiveTrue(Pageable pageable);
     
+    List<Vendor> findByIsActiveTrue();
+    
     Page<Vendor> findByCategoryAndIsActiveTrue(String category, Pageable pageable);
     
     List<Vendor> findByCategoryAndIsActiveTrue(String category);
@@ -32,4 +34,6 @@ public interface VendorRepository extends MongoRepository<Vendor, String> {
     List<Vendor> findByCityAndIsActiveTrue(String city);
     
     long countByCategoryAndIsActiveTrue(String category);
+    
+    long countByCategory(String category);
 }

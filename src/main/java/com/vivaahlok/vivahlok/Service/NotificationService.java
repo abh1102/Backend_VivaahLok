@@ -64,7 +64,11 @@ public class NotificationService {
     }
     
     public void markAllAsRead(String userId) {
-        notificationRepository.markAllAsReadByUserId(userId);
+        List<Notification> unreadNotifications = notificationRepository.findByUserIdAndIsReadFalse(userId);
+        unreadNotifications.forEach(notification -> {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        });
     }
     
     private NotificationDTO mapToNotificationDTO(Notification notification) {

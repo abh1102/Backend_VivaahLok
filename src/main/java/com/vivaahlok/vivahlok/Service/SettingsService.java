@@ -43,8 +43,8 @@ public class SettingsService {
                 .orElse(UserSettings.builder().userId(userId).build());
         
         if (request.getCity() != null) settings.setCity(request.getCity());
-        if (request.getLatitude() != null) settings.setLatitude(request.getLatitude());
-        if (request.getLongitude() != null) settings.setLongitude(request.getLongitude());
+//        if (request.getLatitude() != null) settings.setLatitude(request.getLatitude());
+//        if (request.getLongitude() != null) settings.setLongitude(request.getLongitude());
         
         settings.setUpdatedAt(LocalDateTime.now());
         userSettingsRepository.save(settings);
@@ -54,9 +54,9 @@ public class SettingsService {
         return SettingsDTO.builder()
                 .notifications(settings.isNotifications())
                 .language(settings.getLanguage())
-                .city(settings.getCity())
-                .latitude(settings.getLatitude())
-                .longitude(settings.getLongitude())
+//                .city(settings.getCity())
+//                .latitude(settings.getLatitude())
+//                .longitude(settings.getLongitude())
                 .build();
     }
 }

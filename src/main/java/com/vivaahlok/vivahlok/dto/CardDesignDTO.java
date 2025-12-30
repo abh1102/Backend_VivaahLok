@@ -14,4 +14,5 @@ public class CardDesignDTO {
     private String name;
     private String previewImage;
     private String category;
+    private String templateUrl;
 }

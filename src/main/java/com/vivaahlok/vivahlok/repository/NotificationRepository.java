@@ -12,6 +12,8 @@ import java.util.List;
 public interface NotificationRepository extends MongoRepository<Notification, String> {
     Page<Notification> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
     
+    Page<Notification> findByUserId(String userId, Pageable pageable);
+    
     List<Notification> findByUserIdAndIsReadFalse(String userId);
     
     long countByUserIdAndIsReadFalse(String userId);

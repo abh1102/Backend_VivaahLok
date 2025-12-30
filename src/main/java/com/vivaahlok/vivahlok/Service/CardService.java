@@ -45,7 +45,7 @@ public class CardService {
                 .brideName(request.getBrideName())
                 .eventDate(request.getEventDate())
                 .venue(request.getVenue())
-                .isFamily(request.getIsFamily() != null ? request.getIsFamily() : false)
+                .isFamily(request.isFamily())
                 .cardUrl("/cards/view/" + shareToken)
                 .shareUrl("/cards/share/" + shareToken)
                 .thumbnail(design.getPreviewImage())

@@ -1,15 +1,12 @@
 package com.vivaahlok.vivahlok.controller;
 
-import com.vivaahlok.vivahlok.dto.request.*;
 import com.vivaahlok.vivahlok.dto.response.ApiResponse;
 import com.vivaahlok.vivahlok.dto.response.AuthResponse;
-import com.vivaahlok.vivahlok.dto.response.OtpResponse;
 import com.vivaahlok.vivahlok.dto.response.TokenResponse;
 import com.vivaahlok.vivahlok.security.CurrentUser;
 import com.vivaahlok.vivahlok.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,39 +14,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Authentication APIs")
 public class AuthController {
     
     private final AuthService authService;
     
-    @PostMapping("/send-otp")
-    @Operation(summary = "Send OTP to phone number")
-    public ResponseEntity<OtpResponse> sendOtp(@Valid @RequestBody SendOtpRequest request) {
-        OtpResponse response = authService.sendOtp(request);
+    @PostMapping("/signup")
+    @Operation(summary = "Signup with Firebase ID token")
+    public ResponseEntity<AuthResponse> signup(@RequestHeader("Authorization") String authorization) {
+        String firebaseIdToken = authorization.replace("Bearer ", "");
+        AuthResponse response = authService.signup(firebaseIdToken);
         return ResponseEntity.ok(response);
     }
     
-    @PostMapping("/verify-otp")
-    @Operation(summary = "Verify OTP and login")
-    public ResponseEntity<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        AuthResponse response = authService.verifyOtp(request);
+    @PostMapping("/login")
+    @Operation(summary = "Login with Firebase ID token")
+    public ResponseEntity<AuthResponse> login(@RequestHeader("Authorization") String authorization) {
+        String firebaseIdToken = authorization.replace("Bearer ", "");
+        AuthResponse response = authService.login(firebaseIdToken);
         return ResponseEntity.ok(response);
-    }
-    
-    @PostMapping("/resend-otp")
-    @Operation(summary = "Resend OTP")
-    public ResponseEntity<OtpResponse> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
-        OtpResponse response = authService.resendOtp(request);
-        return ResponseEntity.ok(response);
-    }
-    
-    @PostMapping("/register/user")
-    @Operation(summary = "Register new user")
-    public ResponseEntity<ApiResponse<Map<String, String>>> registerUser(@Valid @RequestBody RegisterUserRequest request) {
-        String userId = authService.registerUser(request);
-        return ResponseEntity.ok(ApiResponse.success("User registered successfully", Map.of("userId", userId)));
     }
     
     @PostMapping("/logout")
@@ -61,8 +46,9 @@ public class AuthController {
     
     @PostMapping("/refresh-token")
     @Operation(summary = "Refresh JWT token")
-    public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        TokenResponse response = authService.refreshToken(request);
+    public ResponseEntity<TokenResponse> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        TokenResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(response);
     }
 }
