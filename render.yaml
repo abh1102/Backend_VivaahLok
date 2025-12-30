@@ -1,0 +1,99 @@
+services:
+  # Web Service
+  - type: web
+    name: vivahlok-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /actuator/health
+    
+    # Environment variables
+    envVars:
+      # Database Configuration
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false
+        value: mongodb://vivahlok:vivahlok123@vivahlok-db:27017/vivahlok
+        
+      # Redis Configuration  
+      - key: SPRING_DATA_REDIS_HOST
+        sync: false
+        value: vivahlok-redis
+        
+      - key: SPRING_DATA_REDIS_PORT
+        sync: false
+        value: 6379
+        
+      # JWT Configuration
+      - key: JWT_SECRET
+        sync: false
+        value: VivaahLokSecretKey2024SuperSecureJWTTokenForAuthenticationPurpose
+        
+      - key: JWT_EXPIRATION
+        sync: false
+        value: 86400000
+        
+      - key: JWT_REFRESH_EXPIRATION
+        sync: false
+        value: 604800000
+        
+      # Firebase Configuration
+      - key: FIREBASE_CREDENTIALS_FILE
+        sync: false
+        value: firebase-service-account.json
+        
+      - key: FIREBASE_DATABASE_URL
+        sync: false
+        value: https://your-project-id-default.firebaseio.com
+        
+      # File Upload Configuration
+      - key: FILE_UPLOAD_DIR
+        sync: false
+        value: ./uploads
+        
+      # Server Configuration
+      - key: PORT
+        sync: false
+        value: 8080
+        
+      - key: JAVA_OPTS
+        sync: false
+        value: "-Xmx512m -Xms256m"
+
+  # MongoDB Service (if you want to use Render's managed MongoDB)
+  - type: pserv
+    name: vivahlok-db
+    env: docker
+    plan: free
+    repo: https://github.com/render-examples/mongodb
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    
+    # Environment variables for MongoDB
+    envVars:
+      - key: MONGO_INITDB_ROOT_USERNAME
+        sync: false
+        value: vivahlok
+        
+      - key: MONGO_INITDB_ROOT_PASSWORD
+        sync: false
+        value: vivahlok123
+        
+      - key: MONGO_INITDB_DATABASE
+        sync: false
+        value: vivahlok
+
+  # Redis Service (if you want to use Render's managed Redis)
+  - type: pserv
+    name: vivahlok-redis
+    env: docker
+    plan: free
+    repo: https://github.com/render-examples/redis
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    
+    # Environment variables for Redis
+    envVars:
+      - key: REDIS_PASSWORD
+        sync: false
+        value: vivahlok123
