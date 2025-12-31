@@ -6,6 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- ================= PARENT ================= -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,30 +14,25 @@
         <relativePath/>
     </parent>
 
+    <!-- ================= PROJECT INFO ================= -->
     <groupId>com.vivaahlok</groupId>
     <artifactId>vivahlok</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>vivahlok</name>
     <description>Backend of VivaahLok</description>
 
+    <!-- ================= PROPERTIES ================= -->
     <properties>
         <java.version>17</java.version>
     </properties>
 
+    <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
 
-        <!-- ================= CORE SPRING BOOT ================= -->
-
+        <!-- ===== CORE SPRING ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <!-- CRITICAL: remove commons-logging -->
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -54,8 +50,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- ================= DATABASES ================= -->
-
+        <!-- ===== DATABASES ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -66,16 +61,7 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
-        <!-- ================= LOGGING (MANDATORY FIX) ================= -->
-
-        <!-- Explicit Logback required for Spring Boot 3 on Docker/Render -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
-        <!-- ================= JWT ================= -->
-
+        <!-- ===== JWT ===== -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -96,31 +82,21 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ================= OPENAPI / SWAGGER ================= -->
-
+        <!-- ===== SWAGGER / OPENAPI ===== -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.3.0</version>
         </dependency>
 
-        <!-- ================= FIREBASE ================= -->
-
+        <!-- ===== FIREBASE ===== -->
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
             <version>9.2.0</version>
-            <exclusions>
-                <!-- Prevent logging conflicts -->
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- ================= LOMBOK ================= -->
-
+        <!-- ===== LOMBOK ===== -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -128,8 +104,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ================= TESTING ================= -->
-
+        <!-- ===== TESTING ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -144,9 +119,11 @@
 
     </dependencies>
 
+    <!-- ================= BUILD ================= -->
     <build>
         <plugins>
 
+            <!-- Java 17 Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -163,6 +140,7 @@
                 </configuration>
             </plugin>
 
+            <!-- Spring Boot Fat JAR -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
